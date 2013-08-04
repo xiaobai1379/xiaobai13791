@@ -1,0 +1,141 @@
+#include<iostream>
+using namespace std;
+int n,m,sX,sY,Max,tmpN,sum;
+char arr[21][21],cur;
+int vis[21][21],rec[21];
+int dir[4][2]= {{0,1},{0,-1},{1,0},{-1,0}};
+bool judge(int a,int b)
+{
+    if(a>=0&&a<n&&b>=0&&b<m)
+        return true;
+    else
+        return false;
+}
+void dfs(int a,int b)
+{
+    int tmpA,tmpB;
+    for(int i=0; i<4; i++)
+    {
+        tmpA=a+dir[i][0];
+        tmpB=b+dir[i][1];
+       // if(a==0&&b==1)
+      //  printf("tmpa:%d tmpb:%d\n",tmpA,tmpB);
+        if(judge(tmpA,tmpB)&&!vis[tmpA][tmpB]&&arr[tmpA][tmpB]==cur)
+        {
+            vis[tmpA][tmpB]=1;
+            tmpN++;
+            dfs(tmpA,tmpB);
+        }
+    }
+}
+void ddfs(int a,int b)
+{
+    int tmpA,tmpB;
+    for(int i=0; i<4; i++)
+    {
+        tmpA=a+dir[i][0];
+        tmpB=b+dir[i][1];
+        if(judge(tmpA,tmpB)&&arr[tmpA][tmpB]==cur)
+        {
+            arr[tmpA][tmpB]='0';
+            if(!rec[tmpB])
+                rec[tmpB]=1;
+            ddfs(tmpA,tmpB);
+        }
+    }
+}
+void Process()
+{
+    int i,j;
+    for(i=0; i<n; i++)
+        for(j=0; j<m; j++)
+        {
+            if(!vis[i][j]&&arr[i][j]!='0')
+            {
+                vis[i][j]=1;
+                tmpN=1;
+                cur=arr[i][j];
+                dfs(i,j);
+             //   printf("i:%d j:%d max:%d\n",i,j,tmpN);
+                if(tmpN>Max)
+                {
+                    Max=tmpN;
+                    sX=i;
+                    sY=j;
+                }
+            }
+        }
+  //  printf("x:%d y:%d max:%d\n",sX,sY,Max);
+}
+int main()
+{
+    while(~scanf("%d %d",&n,&m))
+    {
+        int i,j,k;
+        sum=0;
+        for( i=0; i<n; i++)
+            for( j=0; j<m; j++)
+                scanf(" %c",&arr[i][j]);
+        while(true)
+        {
+            memset(vis,0,sizeof(vis));
+            Max=0;
+            sX=0;
+            sY=0;
+            Process();
+            if(Max<2)break;
+            sum+=Max*(Max-1);
+            cur=arr[sX][sY];
+            arr[sX][sY]='0';
+            if(!rec[sY])
+                rec[sY]=1;
+            ddfs(sX,sY);
+            //处理下移 
+            for(i=0; i<m; i++)
+            {
+                if(rec[i])
+                {
+                    for(j=0; j<n; j++)
+                    {
+                        if(arr[j][i]=='0')
+                        {
+                            int temp=j-1;
+                            for(; temp>=0; temp--)
+                            {
+                                arr[temp+1][i]=arr[temp][i];
+                            }
+                            arr[0][i]='0';
+                        }
+                    }
+                }
+            }
+            memset(rec,0,sizeof(rec));
+            //处理左移 
+            for(i=m-1; i>=0; i--)
+            {
+                bool flag=true;
+                for(int d=0;d<n;d++)
+                {
+                    if(arr[d][i]!='0')
+                    {
+                        flag=false;
+                        break;
+                    }
+                }
+                if(flag)
+                {
+                    for(j=0; j<n; j++)
+                    {
+                        for(k=i+1; k<m; k++)
+                        {
+                            arr[j][k-1]=arr[j][k];
+                        }
+                        arr[j][m-1]='0';
+                    }
+                }
+            }
+        }
+        printf("%d\n",sum);
+    }
+return 0;
+}
